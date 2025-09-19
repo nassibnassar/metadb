@@ -183,6 +183,9 @@ func (c *Catalog) DropTable(dq dbx.Queryable, table *dbx.Table) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	if err := removeTableEntry(c, dq, table); err != nil {
+		return err
+	}
 	q := "DROP TABLE \"" + table.Schema + "\".\"" + table.Table + "__\""
 	if _, err := dq.Exec(context.TODO(), q); err != nil {
 		return util.PGErr(err)
