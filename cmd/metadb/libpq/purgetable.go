@@ -48,9 +48,9 @@ func purgeDataDropTable(conn net.Conn, node *ast.PurgeDataDropTableStmt, db *dbx
 	catalog.ExecMutex.Lock()
 	defer catalog.ExecMutex.Unlock()
 
-	tx, err := dc.Begin(context.TODO())
-	if err != nil {
-		return util.PGErr(err)
+	tx, err2 := dc.Begin(context.TODO())
+	if err2 != nil {
+		return util.PGErr(err2)
 	}
 	defer dbx.Rollback(tx)
 
@@ -67,8 +67,8 @@ func purgeDataDropTable(conn net.Conn, node *ast.PurgeDataDropTableStmt, db *dbx
 		}
 	}
 
-	if err = tx.Commit(context.TODO()); err != nil {
-		return util.PGErr(err)
+	if err2 = tx.Commit(context.TODO()); err2 != nil {
+		return util.PGErr(err2)
 	}
 	return writeEncoded(conn, []pgproto3.Message{
 		&pgproto3.CommandComplete{CommandTag: []byte("PURGE DATA")},
