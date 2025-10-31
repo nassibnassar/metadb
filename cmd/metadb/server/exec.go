@@ -591,7 +591,8 @@ func execDeleteData(ebuf *execbuffer, cat *catalog.Catalog, cmd *command.Command
 }
 
 func rootKey(pkey []command.CommandColumn) []command.CommandColumn {
-	rootkey := pkey
+	rootkey := make([]command.CommandColumn, len(pkey))
+	_ = copy(rootkey, pkey)
 	for i := range rootkey {
 		rootkey[i].Name = "__root__" + rootkey[i].Name
 	}
