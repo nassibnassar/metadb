@@ -345,11 +345,6 @@ func checkTimeDailyMaintenance(datadir string, db dbx.DB, dp *pgxpool.Pool, cat 
 		}
 	}
 
-	// analyze marc__t
-	if folio {
-		_, _ = dp.Exec(context.TODO(), "ANALYZE folio_source_record.marc__t")
-	}
-
 	// Schedule next maintenance
 	q = "UPDATE metadb.maintenance " +
 		"SET next_maintenance_time = next_maintenance_time +" +
@@ -358,44 +353,14 @@ func checkTimeDailyMaintenance(datadir string, db dbx.DB, dp *pgxpool.Pool, cat 
 		return fmt.Errorf("error updating maintenance time: %w", err)
 	}
 
-	// if err = vacuumAll(db, cat, folio); err != nil {
-	// 	return err
-	// }
+	// analyze marc__t
+	if folio {
+		_, _ = dp.Exec(context.TODO(), "ANALYZE folio_source_record.marc__t")
+	}
 
 	log.Debug("completed maintenance")
 	return nil
 }
-
-/*
-func vacuumAll(db dbx.DB, cat *catalog.Catalog, folio bool) error {
-	dcsuper, err := db.ConnectSuper()
-	if err != nil {
-		return err
-	}
-	defer dbx.Close(dcsuper)
-
-	for _, t := range catalog.SystemTables() {
-		log.Trace("vacuuming table %s", t)
-		if err = dbx.VacuumAnalyze(dcsuper, t); err != nil {
-			return err
-		}
-	}
-	for _, t := range cat.AllTables() {
-		m := t.Main()
-		log.Trace("vacuuming table %s", m)
-		if err = dbx.VacuumAnalyze(dcsuper, m); err != nil {
-			return err
-		}
-	}
-	if folio {
-		for _, t := range []dbx.Table{{Schema: "marctab", Table: "cksum"}, {Schema: "folio_source_record", Table: "marc__t"}} {
-			log.Trace("vacuuming table %s", t)
-			_ = dbx.VacuumAnalyze(dcsuper, t)
-		}
-	}
-	return nil
-}
-*/
 
 func goCreateFunctions(db dbx.DB) {
 	dc, err := db.Connect()
